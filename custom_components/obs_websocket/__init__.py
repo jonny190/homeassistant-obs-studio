@@ -16,6 +16,7 @@ from typing import Any, TypeVar
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -26,6 +27,7 @@ from .const import (
     MIN_RATE_INTERVAL,
     PLATFORMS,
     REFRESH_EVENTS,
+    REMOVED_BUTTON_KEYS,
     SNAPSHOT_QUALITY,
 )
 from .errors import OBSAuthError, is_auth_error, is_request_error
@@ -58,7 +60,7 @@ class OBSConnection:
         self._event_client: Any | None = None
         # obsws-python's ReqClient sends a request and returns whatever reply
         # arrives next, without matching request IDs, so two requests in flight
-        # on the one socket (a poll and a button press or camera snapshot) can
+        # on the one socket (a poll and a switch command or camera snapshot) can
         # swap replies. Serialize them.
         self._request_lock = threading.Lock()
         self._virtual_cam_supported = True
@@ -205,6 +207,10 @@ class OBSConnection:
     async def async_stop_record(self) -> None:
         """Stop recording in OBS."""
         await self._async_request(lambda client: client.stop_record())
+
+    async def async_resume_record(self) -> None:
+        """Resume a paused recording in OBS."""
+        await self._async_request(lambda client: client.resume_record())
 
     async def async_start_virtual_cam(self) -> None:
         """Start the OBS virtual camera."""
@@ -456,8 +462,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: OBSConfigEntry) -> bool:
         coordinator=coordinator,
     )
 
+    _async_remove_old_buttons(hass, entry)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
+
+
+def _async_remove_old_buttons(hass: HomeAssistant, entry: OBSConfigEntry) -> None:
+    """Remove the start/stop buttons that the stream and recording switches replaced."""
+    registry = er.async_get(hass)
+    for key in REMOVED_BUTTON_KEYS:
+        if entity_id := registry.async_get_entity_id("button", DOMAIN, f"{entry.entry_id}_{key}"):
+            registry.async_remove(entity_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: OBSConfigEntry) -> bool:

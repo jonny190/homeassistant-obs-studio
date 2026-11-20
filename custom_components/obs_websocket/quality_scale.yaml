@@ -31,7 +31,7 @@ rules:
   action-exceptions:
     status: done
     comment: >
-      Buttons, the virtual camera switch and the scene select raise
+      The stream, recording and virtual camera switches and the scene select raise
       HomeAssistantError with a translation key on failure.
   config-entry-unloading: done
   docs-configuration-parameters: done

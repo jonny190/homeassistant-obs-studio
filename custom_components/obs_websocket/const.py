@@ -25,7 +25,11 @@ MIN_RATE_INTERVAL: Final = 10
 DEFAULT_SNAPSHOT_SIZE: Final = 1280
 SNAPSHOT_QUALITY: Final = 80
 
-PLATFORMS: Final[list[str]] = ["button", "camera", "select", "sensor", "switch"]
+PLATFORMS: Final[list[str]] = ["camera", "select", "sensor", "switch"]
+
+# Start/stop buttons replaced by the stream and recording switches. Their
+# registry entries are removed at setup so they don't linger as orphans.
+REMOVED_BUTTON_KEYS: Final[tuple[str, ...]] = ("start_stream", "stop_stream", "start_record", "stop_record")
 
 # OBS events (snake_case, as obsws-python names them) that trigger a refresh.
 # Scene collection changes fire a burst of scene created/removed events; the

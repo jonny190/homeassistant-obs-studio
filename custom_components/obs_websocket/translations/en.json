@@ -132,20 +132,6 @@
         "name": "Average frame render time"
       }
     },
-    "button": {
-      "start_stream": {
-        "name": "Start stream"
-      },
-      "stop_stream": {
-        "name": "Stop stream"
-      },
-      "start_record": {
-        "name": "Start recording"
-      },
-      "stop_record": {
-        "name": "Stop recording"
-      }
-    },
     "camera": {
       "program": {
         "name": "Program"
@@ -157,6 +143,12 @@
       }
     },
     "switch": {
+      "stream": {
+        "name": "Stream"
+      },
+      "record": {
+        "name": "Recording"
+      },
       "virtual_camera": {
         "name": "Virtual camera"
       }

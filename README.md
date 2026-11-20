@@ -4,7 +4,7 @@
 
 [OBS Studio](https://obsproject.com/) is a free, open-source application for video recording and live streaming. It is widely used by content creators, gamers, and professionals for streaming to platforms such as Twitch, YouTube, and Facebook Live.
 
-This custom Home Assistant integration connects to OBS Studio via the [WebSocket v5 protocol](https://github.com/obsproject/obs-websocket), exposing real-time stream status, recording status, stream health and performance statistics, and service configuration as sensors, a snapshot camera of the program output, buttons to start and stop streaming and recording, a switch for the virtual camera, and a scene picker that switches the program scene. It uses a persistent connection with event-driven updates for near-instant state changes.
+This custom Home Assistant integration connects to OBS Studio via the [WebSocket v5 protocol](https://github.com/obsproject/obs-websocket), exposing real-time stream status, recording status, stream health and performance statistics, and service configuration as sensors, a snapshot camera of the program output, switches to start and stop streaming, recording and the virtual camera, and a scene picker that switches the program scene. It uses a persistent connection with event-driven updates for near-instant state changes.
 
 ## Requirements
 
@@ -33,7 +33,6 @@ This custom Home Assistant integration connects to OBS Studio via the [WebSocket
        ├── brand/
        ├── translations/
        ├── __init__.py
-       ├── button.py
        ├── camera.py
        ├── config_flow.py
        ├── const.py
@@ -150,31 +149,23 @@ Numeric sensors from OBS's `GetStats` and stream status. OBS's frame counters ar
 
 A still image of the current program scene — what is going to the stream and recording — taken with `GetSourceScreenshot` each time the frontend or an automation asks for one (JPEG, scaled to fit the requested size, 1280 px by default). Rendering a screenshot costs OBS some GPU time, so enable it only where it is useful, e.g. a dashboard picture card or a pre-service check that snapshots the output.
 
-### Buttons
+### Switches
 
-#### Start Stream
+Each switch starts and stops one OBS output and shows whether it is running. They follow OBS, so they also change when you start or stop something from the OBS window. If OBS is unreachable or refuses the request, the switch raises an error that shows up in the UI or the automation trace.
 
-Press to start streaming in OBS. Raises an error if OBS is unreachable or the stream cannot be started (e.g. already streaming).
+#### Stream
 
-#### Stop Stream
+On while OBS is streaming, including while the stream is reconnecting. Turn it on to start streaming with the service set in OBS, and off to stop.
 
-Press to stop streaming in OBS. Raises an error if OBS is unreachable or the stream cannot be stopped (e.g. not currently streaming).
+#### Recording
 
-#### Start Recording
-
-Press to start recording in OBS, to the output path set in OBS. Independent of streaming. Raises an error if OBS is unreachable or recording cannot be started (e.g. already recording).
-
-#### Stop Recording
-
-Press to stop recording in OBS. Raises an error if OBS is unreachable or recording cannot be stopped (e.g. not currently recording).
-
-### Switch
+On while OBS is recording, including while the recording is paused. Turn it on to start recording to the output path set in OBS, and off to stop. Turning it on while a recording is paused resumes that recording rather than starting a new one. Recording is independent of streaming.
 
 #### Virtual Camera
 
-Turns the OBS virtual camera on and off, and shows whether it is running. It changes if the virtual camera is started or stopped from OBS itself too. Handy for video calls: turn it on from a dashboard or an automation without going to the OBS window.
+Turns the OBS virtual camera on and off. Handy for video calls: turn it on from a dashboard or an automation without going to the OBS window.
 
-The switch is **unavailable** when OBS has no virtual camera. On Linux that usually means the `v4l2loopback` kernel module is not installed or loaded. Once you have set it up, restart OBS and the switch becomes available after the integration reconnects.
+This switch is **unavailable** when OBS has no virtual camera. On Linux that usually means the `v4l2loopback` kernel module is not installed or loaded. Once you have set it up, restart OBS and the switch becomes available after the integration reconnects.
 
 ### Select
 
@@ -183,6 +174,17 @@ The switch is **unavailable** when OBS has no virtual camera. On Linux that usua
 Shows the scene OBS is sending to program (the stream, recording and virtual camera) and lets you switch to another one. The options are the scenes in the current scene collection, in the same order as the OBS Scenes dock, and they update straight away when you add, remove or rename a scene or change scene collection. Switching uses OBS's current transition.
 
 In studio mode, choosing a scene sends it straight to program; the preview scene is not shown or changed.
+
+### Upgrading from the start/stop buttons
+
+Earlier versions had four buttons: **Start stream**, **Stop stream**, **Start recording** and **Stop recording**. They have been replaced by the **Stream** and **Recording** switches, and the old buttons are removed from Home Assistant when the integration loads. Update any automations, scripts or dashboards that used them:
+
+| Old | New |
+|-----|-----|
+| `button.press` on `button.obs_studio_<host>_start_stream` | `switch.turn_on` on `switch.obs_studio_<host>_stream` |
+| `button.press` on `button.obs_studio_<host>_stop_stream` | `switch.turn_off` on `switch.obs_studio_<host>_stream` |
+| `button.press` on `button.obs_studio_<host>_start_recording` | `switch.turn_on` on `switch.obs_studio_<host>_recording` |
+| `button.press` on `button.obs_studio_<host>_stop_recording` | `switch.turn_off` on `switch.obs_studio_<host>_recording` |
 
 ## Configuration
 
@@ -203,9 +205,9 @@ The integration maintains a persistent WebSocket connection to OBS with two upda
 
 The performance and stream-health sensors update on the same poll (and on stream/record events), so their resolution is about a minute. The program camera fetches a new screenshot on demand instead.
 
-The switch and the scene select also refresh right after a command succeeds, so they settle even if OBS's event is missed.
+The switches and the scene select also refresh right after a command succeeds, so they settle even if OBS's event is missed.
 
-Requests are sent one at a time over the connection: `obsws-python` does not match replies to request IDs, so overlapping requests (a poll, a button press, a camera snapshot) could otherwise receive each other's replies.
+Requests are sent one at a time over the connection: `obsws-python` does not match replies to request IDs, so overlapping requests (a poll, a switch command, a camera snapshot) could otherwise receive each other's replies.
 
 If the connection to OBS drops, all of its entities are marked **unavailable** and the coordinator attempts to reconnect on the next poll cycle.
 
