@@ -51,23 +51,37 @@
         "default": "mdi:timer-outline"
       }
     },
-    "button": {
-      "start_stream": {
-        "default": "mdi:play"
-      },
-      "stop_stream": {
-        "default": "mdi:stop"
-      },
-      "start_record": {
-        "default": "mdi:record-rec"
-      },
-      "stop_record": {
-        "default": "mdi:stop-circle"
-      }
-    },
     "camera": {
       "program": {
         "default": "mdi:monitor-eye"
+      }
+    },
+    "select": {
+      "scene": {
+        "default": "mdi:filmstrip-box-multiple"
+      }
+    },
+    "switch": {
+      "stream": {
+        "default": "mdi:broadcast",
+        "state": {
+          "on": "mdi:broadcast",
+          "off": "mdi:broadcast-off"
+        }
+      },
+      "record": {
+        "default": "mdi:record-rec",
+        "state": {
+          "on": "mdi:record-rec",
+          "off": "mdi:record"
+        }
+      },
+      "virtual_camera": {
+        "default": "mdi:webcam",
+        "state": {
+          "on": "mdi:webcam",
+          "off": "mdi:webcam-off"
+        }
       }
     }
   }

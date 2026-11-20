@@ -69,6 +69,15 @@
     },
     "stop_record_failed": {
       "message": "Failed to stop recording on OBS at {host}: {error}"
+    },
+    "start_virtual_cam_failed": {
+      "message": "Failed to start the virtual camera on OBS at {host}: {error}"
+    },
+    "stop_virtual_cam_failed": {
+      "message": "Failed to stop the virtual camera on OBS at {host}: {error}"
+    },
+    "set_scene_failed": {
+      "message": "Failed to switch OBS at {host} to scene {scene}: {error}"
     }
   },
   "entity": {
@@ -123,23 +132,25 @@
         "name": "Average frame render time"
       }
     },
-    "button": {
-      "start_stream": {
-        "name": "Start stream"
-      },
-      "stop_stream": {
-        "name": "Stop stream"
-      },
-      "start_record": {
-        "name": "Start recording"
-      },
-      "stop_record": {
-        "name": "Stop recording"
-      }
-    },
     "camera": {
       "program": {
         "name": "Program"
+      }
+    },
+    "select": {
+      "scene": {
+        "name": "Scene"
+      }
+    },
+    "switch": {
+      "stream": {
+        "name": "Stream"
+      },
+      "record": {
+        "name": "Recording"
+      },
+      "virtual_camera": {
+        "name": "Virtual camera"
       }
     }
   }
